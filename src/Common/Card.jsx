@@ -1,0 +1,133 @@
+import { CiHeart } from "react-icons/ci";
+import { IoEyeOutline } from "react-icons/io5";
+import star from '../assets/Five star.png'
+import { useNavigate } from 'react-router';
+import { useDispatch, useSelector } from 'react-redux'
+import { cartReducer,  wishReducer, wishRemoveReducer } from '../Redux/productSlice'
+import {  toast,Bounce } from 'react-toastify';
+import { RiDeleteBin5Fill } from "react-icons/ri";
+
+
+const Card = ({dispercent,
+  image,AddToCardCss,title,disprice,price,rating,review,id,productsDetail,deletIcon,heartIcon,eyeIcon,}) => {
+
+      let navigate = useNavigate();
+  
+    const handleProductsDtls = ()=>{
+      navigate (`/productsDetails/${id}`)
+    }
+
+    const dispatch = useDispatch ()
+  
+  const cardData = useSelector((state) => state.AllProducts.cart);
+  const wishData = useSelector((state) => state.AllProducts.wish);
+  const isWishlisted = id && wishData.some((item) => item.id === id);
+
+const handleCart = (id) => {
+  let matchItem = cardData.filter((item) => item.id === id);
+
+  if (matchItem.length === 0) {
+    dispatch(cartReducer({...productsDetail , quan : 1} ));
+    notify(true); 
+  } else {
+    notify(false); 
+  }
+};
+
+const handleHeart = (id) => {
+  if (!id) return;
+
+  const matchItem = wishData.some((item) => item.id === id);
+
+  if (!matchItem) {
+    dispatch(wishReducer({...productsDetail , quan : 1} ));
+    toast.success("Successfully Added To Wishlist!", {
+      position: "top-right",
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: false,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: "dark",
+      transition: Bounce,
+    });
+  } else {
+    dispatch(wishRemoveReducer(id));
+    toast.info("Removed From Wishlist!", {
+      position: "top-right",
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: false,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: "dark",
+      transition: Bounce,
+    });
+  }
+};
+const notify = (isNew) => {
+  isNew
+    ? toast("Successfully Added To Cart!", {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: false,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "dark",
+        transition: Bounce,
+      })
+    : toast.warn("🦄 Already Added!", {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: false,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "dark",
+        transition: Bounce,
+      });
+};
+
+
+  return (
+    <div className=" w-67.5  group h-87.5 ">
+      <div className=" relative  ">
+        <div className=" h-62.5 relative overflow-hidden pt-8 pl-10 ">
+          <img onClick={handleProductsDtls} src={image} alt="" className='object-cover cursor-pointer' />
+          <span className='py-1 px-3 bg-primary text-white rounded-sm text-xs absolute top-3 left-3'>-{dispercent}%</span>
+          <div className='absolute top-3 right-3 space-y-4'>
+            <div  onClick={()=> handleHeart(id)} className={`${heartIcon} w-8.5 h-8.5 ${isWishlisted ? 'bg-red-100' : 'bg-white'} rounded-full flex justify-center items-center`} >
+              <CiHeart className={`text-xl cursor-pointer ${isWishlisted ? 'text-red-500 fill-red-500' : 'text-[#161616]'}`} />
+            </div>
+            <div className={`${deletIcon || "hidden"} flex cursor-pointer w-8.5 h-8.5 items-center justify-center rounded-full bg-red-100 text-xl text-red-500`}>
+              <RiDeleteBin5Fill className="cursor-pointer" onClick={() => dispatch(wishRemoveReducer(id))} />
+            </div>
+            <div className={`${eyeIcon} w-8.5 h-8.5 bg-white rounded-full flex justify-center items-center`}>
+              <IoEyeOutline className='text-xl' />
+            </div>
+          </div>
+         <button onClick={()=> handleCart (id)}
+          className={` ${AddToCardCss} w-full py-2 cursor-pointer bg-black rounded-bl-sm rounded-br-sm rounded-tr-xs rounded-tl-xs  absolute left-0 bottom-0 translate-y-full   duration-500 ease-in group-hover:translate-y-0  text-center text-white `}>Add To Cart</button>
+        </div>                        
+      </div> 
+      <h3 className='font-medium'>{title}</h3>  
+        <div className='flex gap-4'>
+          <h3 className='font-medium text-primary'>${disprice}</h3>
+          <h3 className='font-medium text-gray-400 line-through'>${price}</h3>
+        </div> 
+        <div className='flex gap-4 mt-2'>
+          <img src={star} alt="" allowHalf value={rating} />
+       <h4 className='font-medium text-gray-400'>({review})</h4>
+
+        </div>
+    
+    </div>
+  )
+}
+
+export default Card
